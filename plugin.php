@@ -9,12 +9,18 @@
  * License URI: http://www.gnu.org/licenses/gpl.txt
  * Description: Combines several techniques and strategies to enforce SSL everywhere. Partially based upon <a hred="https://surniaulula.com/extend/plugins/jsm-force-ssl/">JSM's Force SSL / HTTPS</a> and <a href="https://de.wordpress.org/plugins/http-https-remover/">HTTP / HTTPS Remover</a>. Hooks into the content filters. Supports Hyper Cache out of the box.
  * Requires PHP: 5.6
- * Requires At Least: 4.7
- * Tested Up To: 5.0-nightly
- * Version: 1.3
+ * Requires At Least: 3.6
+ * Tested Up To: 5.0.3
+ * Version: 1.3.3
  */
 
-require_once( 'includes/simple_html_dom.php' );
+if( defined( '_UI_SSL_ENFORCER_DOM_PARSER' ) && _UI_SSL_ENFORCER_DOM_PARSER != false ) {
+	
+	if( ! class_exists( 'simple_html_dom' ) ) {
+		require_once( 'includes/simple_html_dom.php' );
+	}
+}
+
 require_once( 'includes/base.class.php' );
 require_once( 'includes/enforcer.class.php' );
 

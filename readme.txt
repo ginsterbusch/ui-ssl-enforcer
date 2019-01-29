@@ -1,4 +1,4 @@
-=== JSM's Force SSL / HTTPS -- Simple, Fast and Effective ===
+=== UI SSL Enforcer - Force SSL / HTTPS ===
 Plugin Name: UI SSL Enforcer
 Plugin Slug: ui-ssl-enforcer
 Text Domain: ui-ssl-enforcer
@@ -8,15 +8,15 @@ License URI: https://www.gnu.org/licenses/gpl.txt
 Tags: redirect, force, ssl, https, upload, force_ssl, force_ssl_admin, force_ssl_login, enforce_ssl, upload_dir, proxy, load balancing, permanent
 Contributors: usability.idealist
 Requires PHP: 5.4
-Requires At Least: 3.8
-Tested Up To: 5.0-nightly
-Stable Tag: 1.1
+Requires At Least: 3.6
+Tested Up To: 5.1-nightly
+Stable Tag: 1.3
 
 Simple, fast and effective &mdash; enforce HTTP URLs to HTTPS using WordPress filters and permanent redirects.
 
 == Description ==
 
-**A simple, fast and effective way to make sure that all HTTP URLs get rewritten / redirected to HTTPS** &mdash; including the WordPress upload folder and plugin url paths. Simply activate the plugin and you're done. ;-)
+**A simple, fast and effective way to make sure that all HTTP URLs get rewritten / redirected to HTTPS** &mdash; including the WordPress upload folder and plugin url paths. Avoids "mixed content" error situations. Simply activate the plugin and you're done. ;-)
 
 The plugin defines the following constants (if not already defined), then makes sure that all HTTP requests are rewritten / redirected to their HTTPS equivalent:
 
@@ -134,6 +134,10 @@ Expects one parameter, which is the content / text to filter.
 * [GitHub](https://github.com/ginsterbusch/ui-ssl-enforcer)
 
 <h3>Changelog / Release Notes</h3>
+
+** Version 1.3.3 (2018-10-17)**
+
+* Workaround for crappy programming of others: check if simple_html_dom is already loaded.
 
 **Version 1.3 (2018-05-23)**
 

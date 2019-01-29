@@ -9,8 +9,8 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		 * NOTE: No need for a Singleton Factory pattern for the plugin main class ... ^_^
 		 */
 		
-		public static function &get_instance() {
-			new self( true );
+		public static function get_instance() {
+			$local_instance = new self( true );
 		}
 
 
@@ -273,6 +273,8 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		function replace_all_urls( $content = '' ) {
 			$return = $content;
 			
+			
+			
 			/**
 			 * NOTE: Experimental feature - enable it by adding the constant _UI_SSL_ENFORCER_DOM_PARSER with TRUE as value (ie. define( '_UI_SSL_ENFORCER_DOM_PARSER', true ) )
 			 * FIXME: Sometimes leads to errors inside inline script snippets. 
@@ -297,7 +299,7 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		/**
 		 * DOM-aware version of @method replace_content_urls()
 		 */
-		function replace_html_urls( $content = '' ) {
+		function replace_html_urls( $content = '', $exclude = array() ) {
 			$return = $content;
 			
 			//if( !empty( $return ) && strpos( $return, 'http://' ) !== false ) {
@@ -376,7 +378,7 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		 * Replace URLs everywhere with their SSL equivalent
 		 */
 		
-		function replace_text_urls( $content = '' ) {
+		function replace_text_urls( $content = '', $exclude = array() ) {
 			$return = $content;
 			
 			if( $this->_has_http( $return ) ) {
@@ -390,7 +392,7 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		 * Instead of output buffer parsing, we just fetch the most important filter contents ..
 		 */
 
-		function replace_content_urls( $content = '') {
+		function replace_content_urls( $content = '', $exclude = array() ) {
 			$return = $content;
 		
 			if( !empty( $return ) ) {
