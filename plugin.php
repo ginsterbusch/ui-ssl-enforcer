@@ -4,13 +4,13 @@
  * Text Domain: ui-ssl-enforcer
  * Plugin URI: http://f2w.de/ui-ssl-enforcer
  * Author: Fabian Wolf
- * Author URI: http://usability-idealist.de/
+ * Author URI: https://usability-idealist.net
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl.txt
  * Description: Combines several techniques and strategies to enforce SSL everywhere. Partially based upon <a hred="https://surniaulula.com/extend/plugins/jsm-force-ssl/">JSM's Force SSL / HTTPS</a> and <a href="https://de.wordpress.org/plugins/http-https-remover/">HTTP / HTTPS Remover</a>. Hooks into the content filters. Supports Hyper Cache out of the box.
  * Requires PHP: 5.6
  * Requires At Least: 3.6
- * Tested Up To: 5.0.3
+ * Tested Up To: 5.2.2
  * Version: 1.3.3
  */
 
