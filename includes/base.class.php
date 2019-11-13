@@ -3,7 +3,42 @@
 if ( ! class_exists( '_ui_SSL_Enforcer_Base' ) ) {
 
 	class _ui_SSL_Enforcer_Base {
-
+		function get_plugin_prefix( ) {
+			$return = '';
+			
+			
+			if( defined( '_UI_SSL_PLUGIN_PREFIX' ) ) {
+				$return = _UI_SSL_PLUGIN_PREFIX;
+			} elseif( !defined( '_UI_SSL_PLUGIN_PREFIX' ) ) {
+				
+				$caller = get_called_class();
+				
+				if( $caller::pluginPrefix != '' ) {
+					$return = $caller::pluginPrefix;
+				}
+					
+			}
+			
+			return $return;
+		}
+		
+		/**
+		 * Combine $plugin_prefix + $text, eg. _my_plugin_prefix_my_text.
+		 */
+		
+		function add_plugin_prefix( $text = '' ) {
+			$return = $text;
+			
+			$plugin_prefix = $this->get_plugin_prefix();
+			
+			if( !empty( $plugin_prefix ) ) {
+				$return = $plugin_prefix . $text;
+			}
+			
+			return $return;
+		}
+		
+		
 	
 		public static function get_wp_version() {
 			$version = 0;
@@ -174,14 +209,14 @@ if ( ! class_exists( '_ui_SSL_Enforcer_Base' ) ) {
 				foreach( $arrMethods as $strMethod ) {
 					switch( $type ) {
 						case 'prefix':
-							if( substr( $strMethod, 0, strlen( $strMethod ) ) == $search ) {
+							if( substr( $strMethod, 0, strlen( $search ) ) == $search ) {
 								$arrReturn[] = $strMethod;
 							}
 
 							break;
 						case 'postfix':
 						case 'suffix':
-							if( substr( $strMethod, -strlen( $strMethod ) ) == $search ) {
+							if( substr( $strMethod, -strlen( $search ) ) == $search ) {
 								$arrReturn[] = $strMethod;
 							}
 						

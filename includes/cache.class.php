@@ -1,8 +1,22 @@
 <?php
+/**
+ * Optional simple Caching class for SSL Enforcer
+ * Has to be explicitely enabled (see the documentation for more info).
+ */
 
-if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 
-	class _ui_SSL_Enforcer extends _ui_SSL_Enforcer_Base {
+if ( ! class_exists( '_ui_SSL_Enforcer_Cache' ) ) {
+	/**
+	 * Is hyper cache enabled and available?
+	 */
+	
+	protected $is_hyper_cache = false;
+	
+	/**
+	 * Is W3 
+	
+
+	class _ui_SSL_Enforcer_Cache extends _ui_SSL_Enforcer_Base {
 		const pluginPrefix = '_ui_ssl_enforcer_';
 				
 		/**
@@ -10,106 +24,19 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		 */
 		
 		public static function get_instance() {
-			$local_instance = new self( true );
+			new self( true );
 		}
 
 
 		public function __construct( $plugin_init = false ) {
 
-			//add_action( 'plugins_loaded', array( __CLASS__, 'load_textdomain' ) );
-
-			/**
-			 * WordPress should redirect back-end / admin URLs just
-			 * fine, but the front-end may need some help. Hook the
-			 * 'init' action and check the protocol if FORCE_SSL is
-			 * true.
-			 */
-			if( !empty( $plugin_init ) ) {
-					
-				if ( defined( 'FORCE_SSL' ) && FORCE_SSL && ! is_admin() ) {
-					add_action( 'init', array( $this, 'force_ssl_redirect' ), -9000 );
-				}
-
-				/**
-				 * Make sure URLs from the upload directory - like
-				 * images in the Media Library - use the correct
-				 * protocol.
-				 */
-				add_filter( 'upload_dir', array( $this, 'upload_dir_urls' ), 1000, 1 );
-
-
-				/**
-				 * Adjust the URL returned by the WordPress
-				 * plugins_url() function.
-				 */
-				add_filter( 'plugins_url', array( $this, 'update_url' ), 1000, 1 );
-				
-				/**
-				 * Adjust script and CSS source urls 
-				 * Inspired by SSL Insecure Content Fixer :)
-				 */
-				add_filter('script_loader_src', array( $this, 'update_resource_url') );
-				add_filter('style_loader_src', array( $this, 'update_resource_url' ) );
-				
-				/**
-				 * Adjust URLs in content
-				 */
-
-
-				// catch plugins / themes overriding the user's avatar and breaking it
-				add_filter('get_avatar', array($this, 'replace_content_urls'), 9999);
-
-				// filter image links on front end e.g. in calls to wp_get_attachment_image(), wp_get_attachment_image_src(), etc.
-				if (!is_admin() || $this->is_ajax() ) {
-					add_filter('wp_get_attachment_url', array( $this, 'update_url' ), 100);
-				}
-				
-				// first
-				
-				add_filter( 'the_content', array( $this, 'replace_all_urls' ), 10, 1 );
-				add_filter( 'the_content_feed', array( $this, 'replace_all_urls' ), 10, 1 );
-				
-				// .. and last call (or so we guess)
-				add_filter( 'the_content', array( $this, 'replace_all_urls' ), 1000, 1 );
-				add_filter( 'the_content_feed', array( $this, 'replace_all_urls' ), 1000, 1 );
-				
 				// filter hyper cache (if available)
 				if( function_exists( 'hyper_cache_callback' ) ) {
 					add_filter( 'cache_buffer', array( $this, 'filter_hyper_cache_content' ) );
+					$this->is_hyper_cache = true;
 				}
 				
-				// filter simple cache (if available)
-				if( class_exists( 'SC_Advanced_Cache' ) || class_exists( 'SC_Object_Cache' ) || defined( 'SC_VERSION' ) ) {
-					add_filter( 'sc_pre_cache_buffer', array( $this, 'filter_simple_cache_buffer' ) );
-				}
 				
-				/**
-				 * Filter widget contents, too
-				 */
-				$widget_filters = apply_filters( self::pluginPrefix . 'get_widget_filters', array(
-					'widget_text',
-					'widget_text_content', // custom text widget
-					
-					'widget_custom_html_content', // custom html widget
-				) );
-				
-				if( !empty( $widget_filters ) && is_array( $widget_filters ) ) {
-					foreach( $widget_filters as $strFilterHook ) {
-						// first call ..
-						add_filter( $strFilterHook, array( $this, 'replace_all_urls' ), 10, 1 );
-						
-						// ... last call
-						add_filter( $strFilterHook, array( $this, 'replace_all_urls' ), 1000, 1 );
-						
-					}
-				}
-				//add_filter( 'widget_text', array( $this, 'replace_content_urls' ), 1000, 1 );
-				
-				
-				/**
-				 * Custom data filter
-				 */
-				add_filter ('_ui_ssl_enforcer_filter_content', array( $this, 'replace_all_urls' ), 1000, 1 );
 			}
 		}
 
@@ -243,20 +170,6 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		}
 
 		/**
-		 * Filter simple cache content buffer before output (or saving). It's essentially identical to @method filter_hyper_cache_content
-		 */
-		function filter_simple_cache_buffer( $buffer = '' ) {
-			$return = $buffer;
-			
-			if( !empty( $return ) ) {
-				$return = $this->filter_hyper_cache_content( $return );
-			}
-			
-			return $return;
-		}
-		
-
-		/**
 		 * Filter hyper cache data right before output
 		 */
 		 
@@ -292,8 +205,6 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		function replace_all_urls( $content = '' ) {
 			$return = $content;
 			
-			
-			
 			/**
 			 * NOTE: Experimental feature - enable it by adding the constant _UI_SSL_ENFORCER_DOM_PARSER with TRUE as value (ie. define( '_UI_SSL_ENFORCER_DOM_PARSER', true ) )
 			 * FIXME: Sometimes leads to errors inside inline script snippets. 
@@ -318,7 +229,7 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		/**
 		 * DOM-aware version of @method replace_content_urls()
 		 */
-		function replace_html_urls( $content = '', $exclude = array() ) {
+		function replace_html_urls( $content = '' ) {
 			$return = $content;
 			
 			//if( !empty( $return ) && strpos( $return, 'http://' ) !== false ) {
@@ -397,7 +308,7 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		 * Replace URLs everywhere with their SSL equivalent
 		 */
 		
-		function replace_text_urls( $content = '', $exclude = array() ) {
+		function replace_text_urls( $content = '' ) {
 			$return = $content;
 			
 			if( $this->_has_http( $return ) ) {
@@ -411,7 +322,7 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		 * Instead of output buffer parsing, we just fetch the most important filter contents ..
 		 */
 
-		function replace_content_urls( $content = '', $exclude = array() ) {
+		function replace_content_urls( $content = '') {
 			$return = $content;
 		
 			if( !empty( $return ) ) {

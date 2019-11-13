@@ -10,7 +10,7 @@ Contributors: usability.idealist
 Requires PHP: 5.4
 Requires At Least: 3.6
 Tested Up To: 5.2.2
-Stable Tag: 1.3
+Stable Tag: 1.4.1
 
 Simple, fast and effective &mdash; enforce HTTP URLs to HTTPS using WordPress filters and permanent redirects.
 
@@ -134,6 +134,15 @@ Expects one parameter, which is the content / text to filter.
 * [GitHub](https://github.com/ginsterbusch/ui-ssl-enforcer)
 
 <h3>Changelog / Release Notes</h3>
+
+** Version 1.4.1 (2019-11-13) **
+
+* Added support for Simple Cache plugin (specifically its output buffer filter hook)
+
+** Version 1.4 (2019-10-28) **
+
+* Started initial work on integrating a simple (optional) admin screen
+* Added new settings class to improve setting up of (required) SSL constants
 
 ** Version 1.3.3 (2018-10-17)**
 

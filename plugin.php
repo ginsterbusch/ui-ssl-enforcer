@@ -2,16 +2,16 @@
 /**
  * Plugin Name: UI SSL Enforcer
  * Text Domain: ui-ssl-enforcer
- * Plugin URI: http://f2w.de/ui-ssl-enforcer
+ * Plugin URI: https://github.com/ginsterbusch/ui-ssl-enforcer
  * Author: Fabian Wolf
  * Author URI: https://usability-idealist.net
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl.txt
- * Description: Combines several techniques and strategies to enforce SSL everywhere. Partially based upon <a hred="https://surniaulula.com/extend/plugins/jsm-force-ssl/">JSM's Force SSL / HTTPS</a> and <a href="https://de.wordpress.org/plugins/http-https-remover/">HTTP / HTTPS Remover</a>. Hooks into the content filters. Supports Hyper Cache out of the box.
+ * Description: Combines several techniques and strategies to enforce SSL everywhere. Partially based upon <a hred="https://surniaulula.com/extend/plugins/jsm-force-ssl/">JSM's Force SSL / HTTPS</a> and <a href="https://wordpress.org/plugins/http-https-remover/">HTTP / HTTPS Remover</a>. Hooks into the content filters. Supports Hyper Cache out of the box.
  * Requires PHP: 5.6
  * Requires At Least: 3.6
- * Tested Up To: 5.2.2
- * Version: 1.3.3
+ * Tested Up To: 5.2.4
+ * Version: 1.4.1
  */
 
 if( defined( '_UI_SSL_ENFORCER_DOM_PARSER' ) && _UI_SSL_ENFORCER_DOM_PARSER != false ) {
@@ -23,7 +23,7 @@ if( defined( '_UI_SSL_ENFORCER_DOM_PARSER' ) && _UI_SSL_ENFORCER_DOM_PARSER != f
 
 require_once( 'includes/base.class.php' );
 require_once( 'includes/enforcer.class.php' );
-
+require_once( 'includes/settings.class.php' );
 
 
 /**
@@ -32,16 +32,25 @@ require_once( 'includes/enforcer.class.php' );
  * specific forced SSL feature.
  */
 
-if ( ! defined( 'FORCE_SSL' ) ) {
-	define( 'FORCE_SSL', true );
-}
+/**
+ * @since 1.4
+ */
+if( class_exists( '_ui_SSL_Enforcer_Settings' ) ) {
+	_ui_SSL_Enforcer_Settings::setup_constants();
+	
+} else { // fallback option
+	
+	if ( ! defined( 'FORCE_SSL' ) ) {
+		define( 'FORCE_SSL', true );
+	}
 
-if ( ! defined( 'FORCE_SSL_ADMIN' ) ) {
-	define( 'FORCE_SSL_ADMIN', true );
-}
+	if ( ! defined( 'FORCE_SSL_ADMIN' ) ) {
+		define( 'FORCE_SSL_ADMIN', true );
+	}
 
-if ( ! defined( 'FORCE_SSL_LOGIN' ) ) {
-	define( 'FORCE_SSL_LOGIN', true );
+	if ( ! defined( 'FORCE_SSL_LOGIN' ) ) {
+		define( 'FORCE_SSL_LOGIN', true );
+	}
 }
 
 /**
