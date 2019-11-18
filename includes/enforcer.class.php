@@ -4,6 +4,8 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 
 	class _ui_SSL_Enforcer extends _ui_SSL_Enforcer_Base {
 		const pluginPrefix = '_ui_ssl_enforcer_';
+		
+		private $is_cache_buffer = false;
 				
 		/**
 		 * NOTE: No need for a Singleton Factory pattern for the plugin main class ... ^_^
@@ -25,6 +27,13 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 			 * true.
 			 */
 			if( !empty( $plugin_init ) ) {
+				/**
+				 * @since 1.4.3
+				 */
+				
+				if( class_exists( '_ui_SSL_Enforcer_Settings' ) ) {
+					$this->settings = new _ui_SSL_Enforcer_Settings();
+				}
 					
 				if ( defined( 'FORCE_SSL' ) && FORCE_SSL && ! is_admin() ) {
 					add_action( 'init', array( $this, 'force_ssl_redirect' ), -9000 );
@@ -76,12 +85,50 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 				// filter hyper cache (if available)
 				if( function_exists( 'hyper_cache_callback' ) ) {
 					add_filter( 'cache_buffer', array( $this, 'filter_hyper_cache_content' ) );
+					$this->is_cache_buffer = true;
 				}
 				
-				// filter simple cache (if available)
+				/**
+				 * filter simple cache (if available)
+				 * @since 1.4.1
+				 */
 				if( class_exists( 'SC_Advanced_Cache' ) || class_exists( 'SC_Object_Cache' ) || defined( 'SC_VERSION' ) ) {
 					add_filter( 'sc_pre_cache_buffer', array( $this, 'filter_simple_cache_buffer' ) );
+					$this->is_cache_buffer = true;
 				}
+				
+				/**
+				 * Filter WP Fastest Cache buffer (if available)
+				 * @since 1.4.2
+				 */
+				
+				if( function_exists( 'wpfc_clear_all_cache' ) || function_exists( 'wpfc_clear_post_cache_by_id' ) ) {
+					//apply_filters('wpfc_buffer_callback_filter', $buffer, $extension);
+					add_filter( 'wpfc_buffer_callback_filter', array( $this, 'filter_wpfc_buffer' ), 10, 2 );
+					$this->is_cache_buffer = true;
+				}
+				
+				/**
+				 * Filter Hummingbird (Performance) cache buffer
+				 * @since 1.4.4
+				 */
+				if( class_exists( 'WP_Hummingbird' ) || defined('WPHB_VERSION') ) {
+					add_filter( 'wphb_cache_content', array( $this, 'filter_wphb_cache_content' ) );
+					$this->is_cache_buffer = true;
+				}
+				 
+				
+				/**
+				 * No caching tool found, but the output buffer cache is enabled?
+				 * NOTE: Preparation for 2.0
+				 * @since 1.4.3
+				 */
+				if( empty( $this->is_cache_buffer ) ) {
+					if( defined( '_UI_SSL_ENFORCER_OUTPUT_BUFFER' ) && _UI_SSL_ENFORCER_USE_OUTPUT_BUFFER !== false ) {
+						add_filter( 'ui_ssl_enforcer_output_buffer', array( $this, 'filter_output_buffer' ) );
+					}
+				} 
+				
 				
 				/**
 				 * Filter widget contents, too
@@ -243,7 +290,56 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		}
 
 		/**
+		 * Filter our very own output buffer
+		 * 
+		 * @since 1.4.3
+		 */
+
+		function filter_output_buffer( $buffer = '' ) {
+			$return = $buffer;
+			
+			if( $this->_has_http( $return ) != false ) {
+				$return = $this->filter_hyper_cache_content( $return );
+			}
+			
+			return $return;
+		}
+
+		/**
+		 * Filter Hummingburd Performance cache content
+		 * 
+		 * @since 1.4.4
+		 */
+		function filter_wphb_cache_content( $content = '' ) {
+			$return = $content;
+			
+			if( $this->_has_http( $return ) != false ) {
+				$return = $this->filter_hyper_cache_content( $return );
+			}
+			
+			return $return;
+		}
+
+
+		/**
+		 * Filter WP Fastest Cache content buffer
+		 * 
+		 * @since 1.4.2
+		 */
+
+		function filter_wpfc_buffer( $buffer = '', $extension = '' ) {
+			$return = $buffer;
+			
+			if( $this->_has_http( $return ) != false ) {
+				$return = $this->filter_hyper_cache_content( $return );
+			}
+			
+			return $return;
+		}
+
+		/**
 		 * Filter simple cache content buffer before output (or saving). It's essentially identical to @method filter_hyper_cache_content
+		 * @since 1.4.1
 		 */
 		function filter_simple_cache_buffer( $buffer = '' ) {
 			$return = $buffer;

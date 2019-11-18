@@ -75,10 +75,28 @@ if ( ! class_exists( '_ui_SSL_Enforcer_Settings' ) ) {
 				define( 'FORCE_SSL_LOGIN', true );
 			}
 		}
+		
+		function check_plugin_constants() {
+			if( ! defined( '_UI_SSL_ENFORCER_DOM_PARSER' ) && $this->get_setting( 'enable_dom_parser', false ) !== false ) {
+				define( '_UI_SSL_ENFORCER_DOM_PARSER' );
+				
+				if( ! class_exists( 'simple_html_dom' ) ) {
+					require_once( 'includes/simple_html_dom.php' );
+				}
+				
+			}
+			
+			if( ! defined( '_UI_SSL_ENFORCER_USE_OUTPUT_BUFFER' ) && $this->get_setting( 'enable_output_buffer', false ) !== false ) {
+				
+				define( '_UI_SSL_ENFORCER_USE_OUTPUT_BUFFER' );
+			}
+			
+		}
 	
 		public static function setup_constants() {
 			$enforcer_settings = new self();
 			$enforcer_settings->check_ssl_constants();
+			$enforcer_settings->check_plugin_constants();
 		}
 	}
 }

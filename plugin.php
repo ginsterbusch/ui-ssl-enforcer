@@ -11,7 +11,7 @@
  * Requires PHP: 5.6
  * Requires At Least: 3.6
  * Tested Up To: 5.2.4
- * Version: 1.4.1
+ * Version: 1.4.4
  */
 
 if( defined( '_UI_SSL_ENFORCER_DOM_PARSER' ) && _UI_SSL_ENFORCER_DOM_PARSER != false ) {

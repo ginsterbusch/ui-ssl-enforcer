@@ -10,7 +10,7 @@ Contributors: usability.idealist
 Requires PHP: 5.4
 Requires At Least: 3.6
 Tested Up To: 5.2.2
-Stable Tag: 1.4.1
+Stable Tag: 1.4.4
 
 Simple, fast and effective &mdash; enforce HTTP URLs to HTTPS using WordPress filters and permanent redirects.
 
@@ -134,6 +134,18 @@ Expects one parameter, which is the content / text to filter.
 * [GitHub](https://github.com/ginsterbusch/ui-ssl-enforcer)
 
 <h3>Changelog / Release Notes</h3>
+
+** Version 1.4.4 (2019-11-18) **
+
+* Added support for Hummingbird Performance cache buffer (filter hook)
+
+** Version 1.4.3 **
+
+* Added support for future own simple cache / output buffer filtering
+
+** Version 1.4.2 **
+
+* Added support for WP Fastest Cache (filter hook)
 
 ** Version 1.4.1 (2019-11-13) **
 
