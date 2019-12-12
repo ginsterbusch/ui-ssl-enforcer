@@ -218,6 +218,7 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 			 */
 			if ( isset( $_SERVER['HTTP_HOST'] ) && isset( $_SERVER['REQUEST_URI'] ) ) {
 				if ( ! $this->is_https() ) {
+					header( 'Strict-Transport-Security: max-age=31536000' );
 					wp_redirect( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], 301 );
 					exit();
 				}
