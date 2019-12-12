@@ -11,7 +11,7 @@
  * Requires PHP: 5.6
  * Requires At Least: 3.6
  * Tested Up To: 5.2.4
- * Version: 1.5
+ * Version: 1.5.1
  */
 
 if( defined( '_UI_SSL_ENFORCER_DOM_PARSER' ) && _UI_SSL_ENFORCER_DOM_PARSER != false ) {
@@ -52,6 +52,8 @@ if( class_exists( '_ui_SSL_Enforcer_Settings' ) ) {
 		define( 'FORCE_SSL_LOGIN', true );
 	}
 }
+
+
 
 /**
  * Init main class

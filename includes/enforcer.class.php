@@ -34,11 +34,18 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 				if( class_exists( '_ui_SSL_Enforcer_Settings' ) ) {
 					$this->settings = new _ui_SSL_Enforcer_Settings();
 				}
-					
+				
+				//echo '<!-- Force SSL: ' . ( defined( 'FORCE_SSL' ) ? 'is enabled' : 'is sadly not enabled' ) . ' -->';
+				
 				if ( defined( 'FORCE_SSL' ) && FORCE_SSL && ! is_admin() ) {
 					add_action( 'init', array( $this, 'force_ssl_redirect' ), -9000 );
+					add_action('wp', array($this, 'force_ssl_redirect'), 40, 3);
+					add_action( 'wp_loaded', array( $this, 'force_ssl_redirect' ), 20 );
+					
 				} elseif( !defined( 'FORCE_SSL' ) && ! is_admin() ) {
 					add_action('wp', array($this, 'force_ssl_redirect'), 40, 3);
+					
+					
 				}
 
 				/**

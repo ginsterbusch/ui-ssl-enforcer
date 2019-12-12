@@ -141,6 +141,10 @@ Future option to hook directly into the stand-alone output buffer / simple cachi
 
 <h3>Changelog / Release Notes</h3>
 
+** Version 1.5.1 **
+
+* Another try at fixing the home page SSL redirect (hopefully this works now reliable)
+
 ** Version 1.5 **
 
 * Added missing home page SSL redirect

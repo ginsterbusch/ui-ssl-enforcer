@@ -63,15 +63,15 @@ if ( ! class_exists( '_ui_SSL_Enforcer_Settings' ) ) {
 		}
 		
 		function check_ssl_constants() {
-			if ( ! defined( 'FORCE_SSL' ) && $this->get_setting( 'enable_force_ssl', false ) !== false ) {
+			if ( ! defined( 'FORCE_SSL' ) && $this->get_setting( 'enable_force_ssl', true ) !== false ) {
 				define( 'FORCE_SSL', true );
 			}
 
-			if ( ! defined( 'FORCE_SSL_ADMIN' ) && $this->get_setting( 'enable_force_ssl_admin', false ) !== false ) {
+			if ( ! defined( 'FORCE_SSL_ADMIN' ) && $this->get_setting( 'enable_force_ssl_admin', true ) !== false ) {
 				define( 'FORCE_SSL_ADMIN', true );
 			}
 
-			if ( ! defined( 'FORCE_SSL_LOGIN' ) && $this->get_setting( 'enable_force_ssl_login', false ) !== false ) {
+			if ( ! defined( 'FORCE_SSL_LOGIN' ) && $this->get_setting( 'enable_force_ssl_login', true ) !== false ) {
 				define( 'FORCE_SSL_LOGIN', true );
 			}
 		}
