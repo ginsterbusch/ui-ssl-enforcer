@@ -5,12 +5,12 @@ Text Domain: ui-ssl-enforcer
 Domain Path: /languages
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl.txt
-Tags: redirect, force, ssl, https, upload, force_ssl, force_ssl_admin, force_ssl_login, enforce_ssl, upload_dir, proxy, load balancing, permanent
+Tags: redirect, force, ssl, https, force_ssl, force_ssl_admin, force_ssl_login, enforce_ssl, tls, mixed content
 Contributors: usability.idealist
 Requires PHP: 5.4
 Requires At Least: 3.6
-Tested Up To: 5.2.2
-Stable Tag: 1.4.4
+Tested Up To: 5.3
+Stable Tag: 1.4.5
 
 Simple, fast and effective &mdash; enforce HTTP URLs to HTTPS using WordPress filters and permanent redirects.
 
@@ -118,12 +118,18 @@ array( 'widget_text',
 	'widget_custom_html_content', // custom html widget
 );```
 
-<h4>Add Ccustom content filters</h4>
+<h4>Add custom content filters</h4>
 **Filter hook:** `_ui_ssl_enforcer_filter_content`
 
 Lets you easily filter ANY kind of content; eg. to add it to the functions.php of your theme or in a specific plugin ..
 
 Expects one parameter, which is the content / text to filter.
+
+<h4>Filtering the output buffer</h4>
+
+**Filter hook:** `ui_ssl_enforcer_output_buffer`
+
+Future option to hook directly into the stand-alone output buffer / simple caching implementation (planned for v2.0).
 
 == Screenshots ==
 
@@ -134,6 +140,19 @@ Expects one parameter, which is the content / text to filter.
 * [GitHub](https://github.com/ginsterbusch/ui-ssl-enforcer)
 
 <h3>Changelog / Release Notes</h3>
+
+** Version 1.5 **
+
+* Added missing home page SSL redirect
+* Added a few filters using the enhanced filter naming scheme (similar to the one used by ACF)
+
+** Version 1.4.6 **
+
+* Added constants (`_UI_SSL_ENFORCER_OUTPUT_BUFFER` and `_UI_SSL_ENFORCER_FORCE_BUFFER`) for the future stand-alone output buffer option (coming in v2.0)
+
+** Version 1.4.5 **
+
+* Added support for the WP Super Cache output buffer (filter hook)
 
 ** Version 1.4.4 (2019-11-18) **
 

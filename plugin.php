@@ -11,19 +11,19 @@
  * Requires PHP: 5.6
  * Requires At Least: 3.6
  * Tested Up To: 5.2.4
- * Version: 1.4.4
+ * Version: 1.5
  */
 
 if( defined( '_UI_SSL_ENFORCER_DOM_PARSER' ) && _UI_SSL_ENFORCER_DOM_PARSER != false ) {
 	
 	if( ! class_exists( 'simple_html_dom' ) ) {
-		require_once( 'includes/simple_html_dom.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/simple_html_dom.php' );
 	}
 }
 
-require_once( 'includes/base.class.php' );
-require_once( 'includes/enforcer.class.php' );
-require_once( 'includes/settings.class.php' );
+require_once( plugin_dir_path( __FILE__ ) . 'includes/base.class.php' );
+require_once( plugin_dir_path( __FILE__ ) . 'includes/enforcer.class.php' );
+require_once( plugin_dir_path( __FILE__ ) . 'includes/settings.class.php' );
 
 
 /**

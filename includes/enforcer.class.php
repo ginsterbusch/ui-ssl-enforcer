@@ -37,6 +37,8 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 					
 				if ( defined( 'FORCE_SSL' ) && FORCE_SSL && ! is_admin() ) {
 					add_action( 'init', array( $this, 'force_ssl_redirect' ), -9000 );
+				} elseif( !defined( 'FORCE_SSL' ) && ! is_admin() ) {
+					add_action('wp', array($this, 'force_ssl_redirect'), 40, 3);
 				}
 
 				/**
@@ -117,17 +119,43 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 					$this->is_cache_buffer = true;
 				}
 				 
+				/**
+				 * Filter WP Super Cache output buffer
+				 * Also see @link https://odd.blog/wp-super-cache-developers/
+				 * 
+				 * @since 1.4.5
+				 */
+				 
+				if( function_exists( 'wp_cache_phase2' ) || function_exists( 'wpsc_init' ) || defined( 'WPCACHEHOME' ) !== false ) {
+					add_filter( 'wpsupercache_buffer', array( $this, 'filter_wpsc_output_buffer' ) );
+					$this->is_cache_buffer = true;
+				}
+				
+				
+				/**
+				 * Force usage of output buffer, even if there might be some caching plugin around
+				 * NOTE: Use at own risk!
+				 * @since 1.4.6
+				 */
+				 
+				if( defined( '_UI_SSL_ENFORCER_FORCE_BUFFER' ) && _UI_SSL_ENFORCE_FORCE_BUFFER !== false ) {
+					$this->is_cache_buffer = false;
+				}
+				 
 				
 				/**
 				 * No caching tool found, but the output buffer cache is enabled?
 				 * NOTE: Preparation for 2.0
+				 * @hook ui_ssl_enforcer_output_buffer	Filter hook for the future output buffer / cache for UI SSL Enforcer
 				 * @since 1.4.3
 				 */
+				 
 				if( empty( $this->is_cache_buffer ) ) {
+					
 					if( defined( '_UI_SSL_ENFORCER_OUTPUT_BUFFER' ) && _UI_SSL_ENFORCER_USE_OUTPUT_BUFFER !== false ) {
 						add_filter( 'ui_ssl_enforcer_output_buffer', array( $this, 'filter_output_buffer' ) );
 					}
-				} 
+				}
 				
 				
 				/**
@@ -306,6 +334,20 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		}
 
 		/**
+		 * Filter WP Super Cache output buffer
+		 * @since 1.4.5
+		 */
+		function filter_wpsc_output_buffer( $buffer = '' ) {
+			$return = $buffer;
+			
+			if( $this->_has_http( $return ) != false ) {
+				$return = $this->filter_hyper_cache_content( $return );
+			}
+			
+			return $return;
+		}
+
+		/**
 		 * Filter Hummingburd Performance cache content
 		 * 
 		 * @since 1.4.4
@@ -410,6 +452,96 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 			
 			return $return;
 		}
+
+		/**
+		 * Method adapted from Really Simple SSL
+		 * 
+		 * @since 1.5
+		 */
+		function init_url_list() {
+			if( !isset( $this->http_urls ) || empty( $this->http_urls ) ) {
+			
+			
+				$home = str_replace( 'https://', 'http://', get_option('home'));
+				$home_no_www = str_replace('://www.', '://', $home);
+				$home_yes_www = str_replace('://', '://www.', $home_no_www);
+
+				//for the escaped version, we only replace the home_url, not it's www or non www counterpart, as it is most likely not used
+				$escaped_home = str_replace("/", "\/", $home);
+
+				$this->http_urls = array(
+					$home_yes_www,
+					$home_no_www,
+					$escaped_home,
+					"src='http://",
+					'src="http://',
+				);
+			}
+		}
+
+
+		/**
+		 * Method adopted from Really Simple SSL (@class rssl_mixed_content_fixer / class-mixed-content-fixer.php / @method replace_insecure_links ).
+		 * 
+		 * @since 1.5
+		 */
+		
+		function replace_insecure_urls( $content = '' ) {
+			$return = $content;
+			
+
+			//skip if file is xml
+			if( substr( $return, 0, 5 ) != '<?xml' ) {
+				$this->init_url_list();
+
+				$search_array = apply_filters( '_ui_ssl_enforcer/replace_url_args', $this->http_urls );
+				
+				if( !empty( $search_array ) ) {
+				
+					
+					$ssl_array = str_replace( array( 'http://', 'http:\/\/' ), array( 'https://', 'https:\/\/' ), $search_array );
+					//now replace these links
+					$return = str_replace($search_array, $ssl_array, $return);
+
+					/**
+					 * replace all http links except hyperlinks
+					 * all tags with src attr are already fixed by str_replace
+					 */
+					 
+					$pattern = array(
+						'/url\([\'"]?\K(http:\/\/)(?=[^)]+)/i',
+						'/<link [^>]*?href=[\'"]\K(http:\/\/)(?=[^\'"]+)/i',
+						'/<meta property="og:image" [^>]*?content=[\'"]\K(http:\/\/)(?=[^\'"]+)/i',
+						'/<form [^>]*?action=[\'"]\K(http:\/\/)(?=[^\'"]+)/i',
+					);
+
+					$return = preg_replace( $pattern, 'https://', $return );
+
+					/* handle multiple images in srcset */
+					/**
+					 * NOTE: Original code uses a separate callback:
+					$return = preg_replace_callback( '/<img[^\>]*[^\>\S]+srcset=[\'"]\K((?:[^"\'\s,]+\s*(?:\s+\d+[wx])(?:,\s*)?)+)["\']/', array( $this, 'replace_src_set' ), $return );
+					* 
+					* ie. THIS one - because of PHP 5.2 backward compatiblity .. if you find one WP install that is still running PHP 5.2, you should just ... RUN FAAAAR AWAY! AND GO HIDING!
+					* 
+					* function replace_src_set($matches) {
+						return str_replace("http://", "https://", $matches[0]);
+						}
+					*/
+					
+
+					$return = preg_replace_callback( '/<img[^\>]*[^\>\S]+srcset=[\'"]\K((?:[^"\'\s,]+\s*(?:\s+\d+[wx])(?:,\s*)?)+)["\']/', function( $matches ) {
+						return str_replace( 'http://', 'https://', $matches[ 0 ] );
+					}, $return );
+
+					$return = str_replace( '<body', '<body data-uisslenforcer=1', $return );
+				}
+			}
+
+			return apply_filters( '_ui_ssl_enforcer/replace_insecure_urls', $return );
+
+		}
+
 
 		/**
 		 * DOM-aware version of @method replace_content_urls()
