@@ -54,7 +54,7 @@ if ( ! class_exists( '_ui_SSL_Enforcer_Settings' ) ) {
 			
 				$arrSettings = $this->_get_settings();
 				
-				if( !empty( $arrSettings ) && isset( $arrSettings[ $setting_name ] ) && $arrSettings[ $setting_name ] !== $default_value ) {
+				if( !empty( $arrSettings ) && is_array( $arrSettings ) && isset( $arrSettings[ $setting_name ] ) && $arrSettings[ $setting_name ] !== $default_value ) {
 					$return = $arrSettings[ $setting_name ];
 				}
 			}
@@ -77,6 +77,7 @@ if ( ! class_exists( '_ui_SSL_Enforcer_Settings' ) ) {
 		}
 		
 		function check_plugin_constants() {
+			
 			if( ! defined( '_UI_SSL_ENFORCER_DOM_PARSER' ) && $this->get_setting( 'enable_dom_parser', false ) !== false ) {
 				define( '_UI_SSL_ENFORCER_DOM_PARSER' );
 				
@@ -86,9 +87,17 @@ if ( ! class_exists( '_ui_SSL_Enforcer_Settings' ) ) {
 				
 			}
 			
-			if( ! defined( '_UI_SSL_ENFORCER_USE_OUTPUT_BUFFER' ) && $this->get_setting( 'enable_output_buffer', false ) !== false ) {
-				
+			if( ! defined( '_UI_SSL_ENFORCER_USE_OUTPUT_BUFFER' ) && $this->get_setting( 'enable_output_buffer', false ) !== false ) {	
 				define( '_UI_SSL_ENFORCER_USE_OUTPUT_BUFFER' );
+			}
+			
+			/**
+			 * @since 1.5.2
+			 * Also see @link https://www.fastcomet.com/tutorials/security/resolving-issues-with-hsts and @link https://really-simple-ssl.com/knowledge-base/what-does-hsts-mean/
+			 */
+			 
+			if( ! defined( '_UI_SSL_ENFORCER_USE_HSTS' ) && $this->get_setting( 'enable_hsts', false ) !== false ) {
+				define( '_UI_SSL_ENFORCER_USE_HSTS', true );
 			}
 			
 		}

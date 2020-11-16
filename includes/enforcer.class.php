@@ -35,9 +35,11 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 					$this->settings = new _ui_SSL_Enforcer_Settings();
 				}
 				
-				//echo '<!-- Force SSL: ' . ( defined( 'FORCE_SSL' ) ? 'is enabled' : 'is sadly not enabled' ) . ' -->';
+				if( !defined( 'FORCE_SSL' ) ) {
+					//echo '<!-- Force SSL: ' . ( defined( 'FORCE_SSL' ) ? 'is enabled' : 'is sadly not enabled' ) . ' -->';
+				}
 				
-				if ( defined( 'FORCE_SSL' ) && FORCE_SSL && ! is_admin() ) {
+				if ( defined( 'FORCE_SSL' ) && FORCE_SSL != false && ! is_admin() ) {
 					add_action( 'init', array( $this, 'force_ssl_redirect' ), -9000 );
 					add_action('wp', array($this, 'force_ssl_redirect'), 40, 3);
 					add_action( 'wp_loaded', array( $this, 'force_ssl_redirect' ), 20 );
@@ -218,7 +220,25 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 			 */
 			if ( isset( $_SERVER['HTTP_HOST'] ) && isset( $_SERVER['REQUEST_URI'] ) ) {
 				if ( ! $this->is_https() ) {
-					header( 'Strict-Transport-Security: max-age=31536000' );
+					/**
+					 * Optionally enable HSTS via the @constant _UI_SSL_ENFORCER_USE_HSTS
+					 * @since 1.5.2
+					 * NOTE: Replace the boolean within the constant with an integer to control the 'max-age' attribute
+					 */
+					
+					if( defined( '_UI_SSL_ENFORCER_USE_HSTS' ) ) {
+						$use_hsts = _UI_SSL_ENFORCER_USE_HSTS;
+						$hsts_max_age = 31536000;
+						
+						if( !empty( $use_hsts ) ) {
+							if( is_int( $use_hsts ) ) {
+								$hsts_max_age = $use_hsts;
+							}
+					
+							header( 'Strict-Transport-Security: max-age=' . $hsts_max_age );
+						}
+					}
+					
 					wp_redirect( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], 301 );
 					exit();
 				}
@@ -281,9 +301,11 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 		 */
 		function is_https( $url = '' ) {
 			static $cache = array();
-			if ( isset( $cache[$url] ) ) {
-				return $cache[$url];
+			
+			if ( isset( $cache[ $url ] ) ) {
+				return $cache[ $url ];
 			}
+			
 			if ( ! empty( $url ) ) {
 				if ( strpos( $url, '://' ) && 
 					parse_url( $url, PHP_URL_SCHEME ) === 'https' ) {
@@ -427,6 +449,36 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 				$return = $this->replace_text_urls( $return );
 			}
 			
+			/**
+			 * Fix for canonical URLs (they should be ABSOLUTE), esp. Yoast SEO
+			 * eg. <link rel="canonical" href="//www.westernsattel.de/" />
+			 */
+			if( stripos( $return, '<link rel="canonical"' ) !== false ) {
+				$return = $this->fix_canonical_url( $return );
+			}
+			
+			
+			return $return;
+		}
+		
+		/**
+		 * Fix issues with the canonical URL in the HEAD
+		 * @since 1.5.3
+		 */
+		
+		function fix_canonical_url( $content = '' ) {
+			$return = $content;
+			
+			if( strpos( $return, '<link rel="canonical" href="//' ) !== false ) {
+				$prot = 'http';
+				
+				if( $this->is_https() ) {
+					$prot .= 's';
+				}
+				
+				$return = str_replace( '<link rel="canonical" href="//', '<link rel="canonical" href="' . $prot . '://', $return );
+			}
+			
 			return $return;
 		}
 
@@ -565,9 +617,8 @@ if ( ! class_exists( '_ui_SSL_Enforcer' ) ) {
 					 * @see https://dev.w3.org/html5/html-author/
 					 */
 					
-					$arrKnownRefTags = apply_filters( self::pluginPrefix . 'get_ref_tags', array(
+					$arrKnownRefTags = apply_filters( $this->add_plugin_prefix( 'get_ref_tags' ), array(
 						'a' => 'href', 'link' => 'href', 'base' => 'href', 'img' => 'src', 'script' => 'src', 'form' => 'action', 'iframe' => 'src', 'embed' => 'src', 'video' => 'src', 'audio' => 'src', 'source' => 'src', 'area' => 'href', 'input' => 'src', 'blockquote' => 'cite',
-						
 					) );
 					
 					if( !empty( $arrKnownRefTags ) ) {

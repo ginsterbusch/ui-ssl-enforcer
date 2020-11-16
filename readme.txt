@@ -9,8 +9,8 @@ Tags: redirect, force, ssl, https, force_ssl, force_ssl_admin, force_ssl_login, 
 Contributors: usability.idealist
 Requires PHP: 5.4
 Requires At Least: 3.6
-Tested Up To: 5.3
-Stable Tag: 1.4.5
+Tested Up To: 5.5.1
+Stable Tag: 1.5.3
 
 Simple, fast and effective &mdash; enforce HTTP URLs to HTTPS using WordPress filters and permanent redirects.
 
@@ -140,6 +140,14 @@ Future option to hook directly into the stand-alone output buffer / simple cachi
 * [GitHub](https://github.com/ginsterbusch/ui-ssl-enforcer)
 
 <h3>Changelog / Release Notes</h3>
+
+** Version 1.5.3 (2020-10-02) **
+
+* Small bugfix for canonical URLs in the HTML head (it should be an ABSOLUTE, not a relative one)
+
+** Version 1.5.2 (2019-12-13) **
+
+* Optionally enable HSTS via a constant (`_UI_SSL_ENFORCER_USE_HSTS`) - props to Charles Lecklider for the suggestion / PR and James Nylen for pointing out possible issues :)
 
 ** Version 1.5.1 **
 

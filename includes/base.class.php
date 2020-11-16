@@ -26,17 +26,29 @@ if ( ! class_exists( '_ui_SSL_Enforcer_Base' ) ) {
 		 * Combine $plugin_prefix + $text, eg. _my_plugin_prefix_my_text.
 		 */
 		
-		function add_plugin_prefix( $text = '' ) {
+		function add_plugin_prefix( $text = '', $right_padding = '' ) {
 			$return = $text;
 			
 			$plugin_prefix = $this->get_plugin_prefix();
 			
 			if( !empty( $plugin_prefix ) ) {
+				
+				if( !empty( $right_padding ) ) { // replace the default '_' right padding with a different string
+					
+					if( ! $this->is_alphanumeric( substr( $plugin_prefix, -1, 1 ) ) ) { // padding is not alphanumeric, so it could either be the default '_' or anything else
+						$plugin_prefix = substr( $plugin_prefix, 0, strlen( $plugin_prefix )-1 ) . $right_padding;
+					} else { // padding string IS alphanumeric, so there is no actual padding existing, hence we ADD the replacement padding string instead of replacing the (non-)existing one
+						$plugin_prefix .= $right_padding;
+					}
+				}
+				
 				$return = $plugin_prefix . $text;
 			}
 			
 			return $return;
 		}
+		
+		
 		
 		
 	
@@ -134,6 +146,26 @@ if ( ! class_exists( '_ui_SSL_Enforcer_Base' ) ) {
 					$return = true;
 				}
 					
+			}
+			
+			return $return;
+		}
+		
+		function is_alphanumeric( $string = '' ) {
+			$return = false;
+			
+			if( !empty( $string ) ) {
+				/**
+				 * Also see @link https://www.php.net/manual/en/function.ctype-alnum.php#111224
+				 */
+				
+				if( function_exists( 'ctype_alnum' ) ) {
+					$return = ctype_alnum( $string );
+				} else {
+					if( preg_match('/^[a-zA-Z0-9]+$/', $string ) !== false ) {
+						$return = true;
+					}
+				}
 			}
 			
 			return $return;
